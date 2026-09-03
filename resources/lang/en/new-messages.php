@@ -310,4 +310,5 @@ return [
 	"product_images_is_required" => "Product images is required",
 	"Product_images_is_required!" => "Product images is required!",
 	"environment_variables_updated_successfully" => "Environment variables updated successfully",
+	"setup_guide" => "Setup guide",
 ];

@@ -31,3 +31,7 @@ temp-data-folder/
 *.env.bak
 storage/oauth-private.key
 storage/oauth-public.key
+
+# PSF: deployment bundles and generated banners are build output, not source
+/psf-deploy.zip
+/storage/psf-deploy/
