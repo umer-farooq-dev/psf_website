@@ -1,0 +1,852 @@
+<title>Guide d'administration PSF</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Public+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+
+<style>
+  :root {
+    --paper:        #f6f8fa;
+    --surface:      #ffffff;
+    --surface-sunk: #eef2f6;
+    --ink:          #12202e;
+    --ink-soft:     #4a5a6b;
+    --ink-faint:    #74838f;
+    --rule:         #dbe3ea;
+    --rule-strong:  #c3cfda;
+    --primary:      #1b6fd0;
+    --primary-deep: #14549e;
+    --primary-wash: #e8f0fb;
+    --brass:        #a9762b;
+    --brass-wash:   #faf2e3;
+    --shadow:       0 1px 2px rgba(18, 32, 46, .06), 0 8px 24px -16px rgba(18, 32, 46, .28);
+
+    --font-display: 'Archivo', 'Segoe UI', system-ui, sans-serif;
+    --font-body:    'Public Sans', 'Segoe UI', system-ui, sans-serif;
+
+    --measure: 66ch;
+    color-scheme: light;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:        #0f1720;
+      --surface:      #161f2a;
+      --surface-sunk: #1c2732;
+      --ink:          #e8eef4;
+      --ink-soft:     #a9b8c6;
+      --ink-faint:    #7f8f9e;
+      --rule:         #26333f;
+      --rule-strong:  #354553;
+      --primary:      #6aa9f0;
+      --primary-deep: #9cc6f7;
+      --primary-wash: #17293e;
+      --brass:        #d6a35c;
+      --brass-wash:   #2b2317;
+      --shadow:       0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -16px rgba(0, 0, 0, .7);
+      color-scheme: dark;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper:        #0f1720;
+    --surface:      #161f2a;
+    --surface-sunk: #1c2732;
+    --ink:          #e8eef4;
+    --ink-soft:     #a9b8c6;
+    --ink-faint:    #7f8f9e;
+    --rule:         #26333f;
+    --rule-strong:  #354553;
+    --primary:      #6aa9f0;
+    --primary-deep: #9cc6f7;
+    --primary-wash: #17293e;
+    --brass:        #d6a35c;
+    --brass-wash:   #2b2317;
+    --shadow:       0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -16px rgba(0, 0, 0, .7);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    text-wrap: balance;
+    margin: 0;
+    letter-spacing: -.015em;
+  }
+
+  a { color: var(--primary-deep); }
+  a:focus-visible,
+  button:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; border-radius: 2px; }
+
+  code, .kbd {
+    font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+    font-size: .88em;
+    background: var(--surface-sunk);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: .1em .4em;
+    white-space: nowrap;
+  }
+
+  /* ---------- masthead ---------- */
+
+  .masthead {
+    background: var(--surface);
+    border-bottom: 1px solid var(--rule);
+  }
+  .masthead-inner {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 48px 28px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .eyebrow {
+    font-family: var(--font-display);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--primary);
+  }
+  .masthead h1 {
+    font-size: clamp(30px, 5vw, 46px);
+    font-weight: 700;
+    line-height: 1.1;
+  }
+  .masthead p {
+    margin: 0;
+    max-width: var(--measure);
+    color: var(--ink-soft);
+    font-size: 17px;
+  }
+  .masthead-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 10px;
+    margin-top: 6px;
+  }
+  .chip {
+    font-family: var(--font-display);
+    font-size: 12.5px;
+    font-weight: 500;
+    padding: 4px 11px;
+    border-radius: 999px;
+    background: var(--surface-sunk);
+    border: 1px solid var(--rule);
+    color: var(--ink-soft);
+  }
+
+  /* ---------- shell ---------- */
+
+  .shell {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 40px 28px 96px;
+    display: grid;
+    grid-template-columns: 232px minmax(0, 1fr);
+    gap: 56px;
+    align-items: start;
+  }
+
+  .toc { position: sticky; top: 24px; }
+  .toc-title {
+    font-family: var(--font-display);
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 12px;
+  }
+  .toc ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    counter-reset: toc;
+  }
+  .toc a {
+    counter-increment: toc;
+    display: grid;
+    grid-template-columns: 22px 1fr;
+    gap: 8px;
+    padding: 7px 10px;
+    border-radius: 6px;
+    text-decoration: none;
+    color: var(--ink-soft);
+    font-size: 14.5px;
+    line-height: 1.35;
+  }
+  .toc a::before {
+    content: counter(toc, decimal-leading-zero);
+    font-family: var(--font-display);
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--ink-faint);
+    font-variant-numeric: tabular-nums;
+    padding-top: 2px;
+  }
+  .toc a:hover { background: var(--surface); color: var(--ink); }
+
+  /* ---------- sections ---------- */
+
+  .doc { display: flex; flex-direction: column; gap: 40px; min-width: 0; }
+
+  section { scroll-margin-top: 20px; }
+
+  .sec-head {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 14px;
+    align-items: baseline;
+    padding-bottom: 14px;
+    border-bottom: 2px solid var(--ink);
+    margin-bottom: 22px;
+  }
+  .sec-num {
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--primary);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: .06em;
+  }
+  .sec-head h2 {
+    font-size: clamp(21px, 2.6vw, 27px);
+    font-weight: 700;
+  }
+  .lede {
+    color: var(--ink-soft);
+    max-width: var(--measure);
+    margin: 0 0 20px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    padding: 22px 24px;
+    box-shadow: var(--shadow);
+  }
+  .card + .card { margin-top: 16px; }
+  .card h3 {
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .card p { margin: 0 0 12px; max-width: var(--measure); color: var(--ink-soft); }
+  .card p:last-child, .card > :last-child { margin-bottom: 0; }
+
+  .path {
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-faint);
+    display: block;
+    margin-bottom: 12px;
+  }
+  .path b { color: var(--primary-deep); font-weight: 600; }
+
+  ol.steps {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: step;
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+  }
+  ol.steps > li {
+    counter-increment: step;
+    display: grid;
+    grid-template-columns: 24px 1fr;
+    gap: 12px;
+    max-width: var(--measure);
+  }
+  ol.steps > li::before {
+    content: counter(step);
+    font-family: var(--font-display);
+    font-size: 12px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--primary);
+    background: var(--primary-wash);
+    border-radius: 5px;
+    height: 22px;
+    display: grid;
+    place-items: center;
+    margin-top: 2px;
+  }
+
+  ul.plain {
+    margin: 0;
+    padding: 0 0 0 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    max-width: var(--measure);
+    color: var(--ink-soft);
+  }
+  ul.plain b { color: var(--ink); font-weight: 600; }
+
+  .note {
+    border-left: 3px solid var(--primary);
+    background: var(--primary-wash);
+    border-radius: 0 8px 8px 0;
+    padding: 14px 18px;
+    margin-top: 16px;
+    max-width: var(--measure);
+  }
+  .note.warn { border-left-color: var(--brass); background: var(--brass-wash); }
+  .note-label {
+    font-family: var(--font-display);
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--primary-deep);
+    display: block;
+    margin-bottom: 5px;
+  }
+  .note.warn .note-label { color: var(--brass); }
+  .note p { margin: 0; color: var(--ink); font-size: 15px; }
+  .note p + p { margin-top: 8px; }
+
+  /* the price rule — the one idea that carries the whole shop */
+  .rule-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 14px;
+    margin-top: 4px;
+  }
+  .rule-col {
+    border: 1px solid var(--rule);
+    border-radius: 9px;
+    padding: 18px;
+    background: var(--surface-sunk);
+  }
+  .rule-col h4 {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--ink);
+  }
+  .rule-flow {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    font-size: 14.5px;
+    color: var(--ink-soft);
+  }
+  .rule-flow li { display: grid; grid-template-columns: 14px 1fr; gap: 8px; }
+  .rule-flow li::before {
+    content: "→";
+    color: var(--primary);
+    font-weight: 600;
+  }
+
+  .tbl-wrap { overflow-x: auto; margin-top: 4px; }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 14.5px;
+    min-width: 460px;
+  }
+  th, td {
+    text-align: left;
+    padding: 9px 14px 9px 0;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+  th {
+    font-family: var(--font-display);
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    border-bottom-color: var(--rule-strong);
+  }
+  td:first-child { font-weight: 600; white-space: nowrap; padding-right: 24px; }
+  td { color: var(--ink-soft); }
+
+  .checklist {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .checklist li {
+    display: grid;
+    grid-template-columns: 18px 1fr;
+    gap: 12px;
+    max-width: var(--measure);
+    color: var(--ink-soft);
+  }
+  .checklist li::before {
+    content: "";
+    width: 15px;
+    height: 15px;
+    border: 1.5px solid var(--rule-strong);
+    border-radius: 3.5px;
+    margin-top: 5px;
+  }
+  .checklist b { color: var(--ink); font-weight: 600; }
+
+  footer {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 28px 64px;
+    color: var(--ink-faint);
+    font-size: 14px;
+  }
+  footer hr { border: 0; border-top: 1px solid var(--rule); margin: 0 0 20px; }
+
+  @media (max-width: 900px) {
+    .shell { grid-template-columns: 1fr; gap: 28px; padding-top: 28px; }
+    .toc {
+      position: static;
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-radius: 10px;
+      padding: 16px 14px;
+    }
+    .toc ol { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <span class="eyebrow">Plomberie Sanitaire du Faso</span>
+    <h1>Guide d'administration du site</h1>
+    <p>
+      Tout ce qui se règle depuis le panneau d'administration : les produits et leurs prix,
+      les demandes de devis, la galerie des réalisations, les coordonnées de la boutique et
+      l'apparence du site. Aucune de ces valeurs n'est figée dans le code — vous pouvez
+      toutes les modifier vous-même.
+    </p>
+    <div class="masthead-meta">
+      <span class="chip">Ouagadougou, Burkina Faso</span>
+      <span class="chip">Interface en français</span>
+      <span class="chip">Aucune connaissance technique requise</span>
+    </div>
+  </div>
+</header>
+
+<div class="shell">
+
+  <nav class="toc" aria-label="Sommaire">
+    <div class="toc-title">Sommaire</div>
+    <ol>
+      <li><a href="#connexion">Se connecter</a></li>
+      <li><a href="#prix">La règle des prix</a></li>
+      <li><a href="#produits">Ajouter un produit</a></li>
+      <li><a href="#devis">Demandes de devis</a></li>
+      <li><a href="#realisations">Nos réalisations</a></li>
+      <li><a href="#parametres">Paramètres PSF</a></li>
+      <li><a href="#accueil">Page d'accueil</a></li>
+      <li><a href="#apparence">Logo et couleurs</a></li>
+      <li><a href="#miseenligne">Avant la mise en ligne</a></li>
+    </ol>
+  </nav>
+
+  <main class="doc">
+
+    <!-- 1 -->
+    <section id="connexion">
+      <div class="sec-head">
+        <span class="sec-num">01</span>
+        <h2>Se connecter à l'administration</h2>
+      </div>
+
+      <div class="card">
+        <span class="path">Adresse : <b>votre-site.bf/login/admin</b></span>
+        <p>
+          Saisissez votre adresse e-mail, votre mot de passe, puis recopiez le code de
+          sécurité affiché à l'écran. Vous arrivez ensuite sur le tableau de bord.
+        </p>
+        <div class="note warn">
+          <span class="note-label">Important</span>
+          <p>
+            Ne communiquez ce mot de passe à personne. Si vous devez donner un accès à un
+            employé, créez-lui son propre compte plutôt que de partager le vôtre.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2 -->
+    <section id="prix">
+      <div class="sec-head">
+        <span class="sec-num">02</span>
+        <h2>La règle des prix</h2>
+      </div>
+      <p class="lede">
+        C'est le point le plus important du site. Le prix que vous saisissez — ou que vous
+        laissez vide — décide de tout ce que le client voit et peut faire.
+      </p>
+
+      <div class="card">
+        <div class="rule-grid">
+          <div class="rule-col">
+            <h4>Vous saisissez un prix</h4>
+            <ul class="rule-flow">
+              <li>Le prix s'affiche sur le site</li>
+              <li>Le client peut ajouter au panier</li>
+              <li>Il peut aussi commander par WhatsApp</li>
+            </ul>
+          </div>
+          <div class="rule-col">
+            <h4>Vous laissez le prix vide</h4>
+            <ul class="rule-flow">
+              <li>Le site affiche « Contactez-nous pour le prix »</li>
+              <li>Le bouton devient « Demander le prix »</li>
+              <li>Le client vous écrit sur WhatsApp</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="note">
+          <span class="note-label">Astuce</span>
+          <p>
+            Utilisez le prix vide pour tout ce qui se négocie : gros volumes, matériel sur
+            devis, articles dont le prix bouge souvent. Le produit reste visible et
+            référencé, mais la discussion se fait avec vous.
+          </p>
+        </div>
+
+        <div class="note warn">
+          <span class="note-label">À retenir</span>
+          <p>
+            Un produit sans prix ne peut pas être mis au panier, même si quelqu'un essaie de
+            contourner le site. C'est volontaire : on ne vend jamais à un prix qui n'a pas
+            été fixé.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3 -->
+    <section id="produits">
+      <div class="sec-head">
+        <span class="sec-num">03</span>
+        <h2>Ajouter un produit</h2>
+      </div>
+
+      <div class="card">
+        <span class="path">Menu : <b>Produits</b> → <b>Ajouter un produit</b></span>
+        <ol class="steps">
+          <li>Donnez un <b>nom clair</b>, celui que le client taperait dans la recherche
+              (« Tube PPR 25 mm », pas « Réf. 4412 »).</li>
+          <li>Choisissez la <b>catégorie</b>. Créez-la d'abord dans
+              <b>Catégories</b> si elle n'existe pas encore.</li>
+          <li>Ajoutez une <b>photo</b>. Une seule photo nette vaut mieux que trois floues.</li>
+          <li>Remplissez le <b>texte alternatif de l'image</b> : décrivez ce qu'on voit.
+              C'est ce que lit Google, et ce qu'entendent les personnes malvoyantes.</li>
+          <li>Saisissez le <b>prix unitaire</b> — ou laissez-le vide pour un prix sur
+              demande (voir la section précédente).</li>
+          <li>Indiquez la <b>disponibilité</b> : en stock, ou sur commande.</li>
+          <li>Enregistrez.</li>
+        </ol>
+
+        <div class="note">
+          <span class="note-label">Astuce</span>
+          <p>
+            La <b>description courte</b> apparaît dans les résultats de recherche de Google.
+            Écrivez-y en une phrase ce que c'est et à quoi ça sert.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4 -->
+    <section id="devis">
+      <div class="sec-head">
+        <span class="sec-num">04</span>
+        <h2>Les demandes de devis</h2>
+      </div>
+      <p class="lede">
+        Quand un client remplit le formulaire « Demande de devis » sur le site, sa demande
+        arrive ici — et vous recevez un e-mail.
+      </p>
+
+      <div class="card">
+        <span class="path">Menu : <b>Demandes de devis</b></span>
+        <p>
+          Les demandes non lues apparaissent en gras avec une pastille rouge, et le nombre
+          s'affiche à côté du menu. Cliquez sur l'œil pour ouvrir une demande.
+        </p>
+
+        <h3>Traiter une demande</h3>
+        <ol class="steps">
+          <li>Ouvrez la demande : vous voyez le nom, le téléphone, le type de client, le
+              produit recherché, la quantité et la pièce jointe éventuelle.</li>
+          <li>Cliquez sur le numéro pour appeler, ou sur <b>Transférer sur WhatsApp</b> pour
+              envoyer le récapitulatif à votre téléphone.</li>
+          <li>Passez le statut à <b>Contacté</b> une fois le client joint.</li>
+          <li>Notez ce qui a été convenu dans la <b>note interne</b> — elle n'est jamais
+              visible par le client.</li>
+          <li>Passez le statut à <b>Clôturé</b> quand l'affaire est terminée.</li>
+        </ol>
+
+        <div class="note">
+          <span class="note-label">Astuce</span>
+          <p>
+            Le bouton <b>Exporter</b> télécharge la liste au format Excel, en respectant le
+            filtre affiché. Pratique pour un suivi mensuel.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5 -->
+    <section id="realisations">
+      <div class="sec-head">
+        <span class="sec-num">05</span>
+        <h2>Nos réalisations</h2>
+      </div>
+      <p class="lede">
+        La galerie des chantiers terminés. C'est ce qui rassure un client qui hésite.
+      </p>
+
+      <div class="card">
+        <span class="path">Menu : <b>Nos réalisations</b> → <b>Ajouter une réalisation</b></span>
+        <ol class="steps">
+          <li>Titre du chantier : « Installation sanitaire, villa Ouaga 2000 ».</li>
+          <li>Catégorie : choisissez-en une dans la liste, ou tapez-en une nouvelle.</li>
+          <li>Photo, lieu et date de réalisation.</li>
+          <li><b>Ordre</b> : le plus petit chiffre s'affiche en premier. Mettez 1 sur vos
+              plus belles réalisations.</li>
+          <li>Laissez <b>Visible sur le site</b> activé, puis enregistrez.</li>
+        </ol>
+
+        <div class="note">
+          <span class="note-label">Bon à savoir</span>
+          <p>
+            Pour retirer temporairement une réalisation, désactivez <b>Visible</b> plutôt que
+            de la supprimer. Vous pourrez la remettre en un clic.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6 -->
+    <section id="parametres">
+      <div class="sec-head">
+        <span class="sec-num">06</span>
+        <h2>Paramètres PSF</h2>
+      </div>
+      <p class="lede">
+        Une seule page regroupe tout ce qui est propre à PSF. C'est ici que vous changez le
+        numéro WhatsApp, l'adresse, les horaires et la carte.
+      </p>
+
+      <div class="card">
+        <span class="path">Menu : <b>Paramètres PSF</b></span>
+        <div class="tbl-wrap">
+          <table>
+            <thead>
+              <tr><th>Section</th><th>Ce que vous y réglez</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>WhatsApp</td>
+                <td>Le numéro qui reçoit les demandes de prix et les commandes, et le message
+                    du bouton flottant.</td>
+              </tr>
+              <tr>
+                <td>Modèles de messages</td>
+                <td>Le texte pré-rempli quand un client vous écrit.
+                    <code>{product}</code> et <code>{url}</code> sont remplacés
+                    automatiquement par le nom du produit et son lien.</td>
+              </tr>
+              <tr>
+                <td>Demandes de devis</td>
+                <td>L'e-mail qui reçoit les notifications, le numéro de transfert, et les
+                    types de client proposés dans le formulaire.</td>
+              </tr>
+              <tr>
+                <td>Moteurs de recherche</td>
+                <td>Autorise ou empêche Google de référencer le site.</td>
+              </tr>
+              <tr>
+                <td>Page d'accueil</td>
+                <td>Les boutons sous le diaporama et les blocs affichés (voir section 07).</td>
+              </tr>
+              <tr>
+                <td>Page Contact</td>
+                <td>Adresse, numéros de téléphone, horaires d'ouverture et carte Google Maps.</td>
+              </tr>
+              <tr>
+                <td>Nos réalisations</td>
+                <td>Les catégories de projets et le nombre de projets par page.</td>
+              </tr>
+              <tr>
+                <td>Menus de l'administration</td>
+                <td>Masque les menus dont vous ne vous servez pas, pour alléger l'écran.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="note">
+          <span class="note-label">Horaires</span>
+          <p>
+            Laissez la case des horaires <b>vide</b> pour qu'un jour s'affiche
+            automatiquement comme « Fermé ». Ces horaires apparaissent à la fois sur la page
+            Contact, sur la page d'accueil, et dans les résultats Google.
+          </p>
+        </div>
+
+        <div class="note">
+          <span class="note-label">Carte Google Maps</span>
+          <p>
+            Sur Google Maps : cherchez la boutique, cliquez sur <b>Partager</b>, puis
+            <b>Intégrer une carte</b>, et copiez le code proposé. Collez-le tel quel dans le
+            champ — le site en extrait ce dont il a besoin.
+          </p>
+        </div>
+
+        <div class="note warn">
+          <span class="note-label">Adresse</span>
+          <p>
+            L'adresse ne se saisit qu'une seule fois, ici. Elle alimente la page Contact, le
+            bloc de la page d'accueil, le bouton « Obtenir l'itinéraire » et la fiche Google
+            de la boutique.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7 -->
+    <section id="accueil">
+      <div class="sec-head">
+        <span class="sec-num">07</span>
+        <h2>Organiser la page d'accueil</h2>
+      </div>
+
+      <div class="card">
+        <span class="path">Menu : <b>Paramètres PSF</b> → section <b>Page d'accueil</b></span>
+
+        <h3>Les boutons sous le diaporama</h3>
+        <p>
+          Jusqu'à trois boutons, avec le libellé et le lien de votre choix. Le premier est mis
+          en avant. Un bouton dont le libellé ou le lien est vide n'apparaît pas.
+        </p>
+
+        <h3>Afficher ou masquer un bloc</h3>
+        <p>
+          Chaque bloc de la page d'accueil possède un interrupteur : vente flash, produits en
+          vedette, catégories, marques, « Pourquoi PSF », notre magasin, et les autres.
+          Activer l'interrupteur <b>masque</b> le bloc — rien n'est supprimé, vous pouvez le
+          réafficher à tout moment.
+        </p>
+
+        <div class="note">
+          <span class="note-label">Pourquoi PSF</span>
+          <p>
+            Le contenu de ce bloc (les icônes et les phrases du type « Livraison rapide »)
+            se modifie dans <b>Pages et médias</b> → <b>Fiabilité de l'entreprise</b>.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8 -->
+    <section id="apparence">
+      <div class="sec-head">
+        <span class="sec-num">08</span>
+        <h2>Logo et couleurs</h2>
+      </div>
+
+      <div class="card">
+        <span class="path">Menu : <b>Paramètres commerciaux</b> → <b>Configuration du site</b></span>
+        <p>
+          Le logo, l'icône de l'onglet et les couleurs du site se règlent ici. La couleur
+          principale s'applique partout d'un coup : boutons, liens, titres, badges.
+        </p>
+        <div class="note">
+          <span class="note-label">Astuce</span>
+          <p>
+            Changez la couleur, enregistrez, puis rechargez la page d'accueil pour voir le
+            résultat. Si rien ne bouge, videz le cache de votre navigateur
+            (<span class="kbd">Ctrl</span> + <span class="kbd">F5</span>).
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9 -->
+    <section id="miseenligne">
+      <div class="sec-head">
+        <span class="sec-num">09</span>
+        <h2>Avant la mise en ligne</h2>
+      </div>
+      <p class="lede">
+        À faire une seule fois, le jour où le site passe sur son vrai nom de domaine.
+        Certains points demandent l'intervention de votre développeur.
+      </p>
+
+      <div class="card">
+        <ul class="checklist">
+          <li><b>Coordonnées vérifiées</b> — numéros de téléphone, e-mail, adresse et
+              horaires relus dans Paramètres PSF.</li>
+          <li><b>Carte Google Maps</b> renseignée et pointant sur la bonne boutique.</li>
+          <li><b>Produits en ligne</b> avec photo, catégorie et prix (ou prix laissé vide
+              volontairement).</li>
+          <li><b>Référencement activé</b> — Paramètres PSF → Moteurs de recherche.</li>
+          <li><b>Plan du site généré</b> — Paramètres SEO → Plan du site, une fois les
+              produits saisis.</li>
+          <li><b>Google Search Console</b> — code de vérification collé dans
+              Paramètres SEO → Outils webmaster.</li>
+          <li><b>Mot de passe administrateur</b> changé pour un mot de passe long et unique.</li>
+          <li><b>Réglages techniques</b> — <code>APP_DEBUG</code> passé à
+              <code>false</code> et <code>APP_URL</code> mis à jour avec le vrai domaine
+              (à faire par le développeur).</li>
+        </ul>
+
+        <div class="note warn">
+          <span class="note-label">Le point à ne pas oublier</span>
+          <p>
+            Tant que <code>APP_DEBUG</code> reste activé, des informations techniques
+            internes sont visibles dans le code des pages. Ce réglage doit impérativement
+            être désactivé avant l'ouverture au public.
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<footer>
+  <hr>
+  <p>
+    Guide d'administration — Plomberie Sanitaire du Faso. Conservez ce document à portée de
+    main : chaque réglage décrit ici se modifie depuis le panneau, sans intervention technique.
+  </p>
+</footer>

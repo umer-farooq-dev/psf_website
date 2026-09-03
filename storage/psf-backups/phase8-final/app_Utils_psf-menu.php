@@ -1,0 +1,389 @@
+<?php
+/**
+ * PSF helpers — admin menu visibility + catalogue display rules.
+ *
+ * Nothing is hard-coded: everything configurable lives in business_settings
+ * so the client can change it from the panel.
+ *
+ * ---------------------------------------------------------------
+ * 1. ADMIN MENU
+ *    Hidden list: business_settings -> `psf_hidden_menus` (JSON array).
+ *    The array below is only the seed used the first time.
+ * ---------------------------------------------------------------
+ */
+
+if (!function_exists('psfDefaultHiddenMenus')) {
+    function psfDefaultHiddenMenus(): array
+    {
+        return [
+            'vendors',              // marketplace only
+            'delivery_men',
+            'withdraws',
+            'wallet',
+            'loyalty_points',
+            'subscribers',
+            'support_tickets',
+            'chatting',
+            'pos',
+            'refunds',
+            'vendor_products',      // no vendors -> no vendor product queue
+            'product_update_requests',
+            'vendor_reports',
+            'themes_addons',        // theme stays as-is (client decision)
+            'theme_menu',
+        ];
+    }
+}
+
+if (!function_exists('psfMenuOptions')) {
+    /**
+     * Menu keys the panel offers as toggles.
+     *
+     * Only keys actually wired into the sidebar are listed, so every switch
+     * on the PSF settings page really does something. Wire a new key into
+     * `_side-bar.blade.php` with `@if (psfMenu('key'))` and add it here.
+     *
+     * @return array<int, string>
+     */
+    function psfMenuOptions(): array
+    {
+        return [
+            'pos',
+            'refunds',
+            'vendors',
+            'vendor_products',
+            'delivery_men',
+            'subscribers',
+            'support_tickets',
+            'themes_addons',
+            'quote_requests',
+        ];
+    }
+}
+
+if (!function_exists('psfHiddenMenus')) {
+    /**
+     * Hidden menu keys, read once per request.
+     */
+    function psfHiddenMenus(): array
+    {
+        static $cached = null;
+        if ($cached !== null) {
+            return $cached;
+        }
+
+        try {
+            $row = \Illuminate\Support\Facades\DB::table('business_settings')
+                ->where('type', 'psf_hidden_menus')
+                ->first();
+
+            if ($row && $row->value !== null && $row->value !== '') {
+                $decoded = json_decode($row->value, true);
+                if (is_array($decoded)) {
+                    return $cached = $decoded;
+                }
+            }
+        } catch (\Throwable $e) {
+            // table not ready (install/migrate) -> fall through to defaults
+        }
+
+        return $cached = psfDefaultHiddenMenus();
+    }
+}
+
+if (!function_exists('psfMenu')) {
+    /**
+     * True when this menu item should be rendered.
+     *
+     * @param string $key menu key, e.g. 'vendors'
+     */
+    function psfMenu(string $key): bool
+    {
+        return !in_array($key, psfHiddenMenus(), true);
+    }
+}
+
+/**
+ * ---------------------------------------------------------------
+ * 2. CATALOGUE — the two-path price model (client brief §7 / §8)
+ *
+ *    price entered  -> show price  -> "Ajouter au panier"
+ *    price blank/0  -> "Contactez-nous pour le prix" -> "Demander le prix"
+ * ---------------------------------------------------------------
+ */
+
+if (!function_exists('psfHasPrice')) {
+    /**
+     * Does this product have a real, sellable price?
+     *
+     * Rule (agreed with the client): the main unit price decides.
+     * If it is blank or 0 the whole product is "prix sur demande",
+     * whatever the variations say.
+     *
+     * @param object|array|null $product
+     */
+    function psfHasPrice($product): bool
+    {
+        if (empty($product)) {
+            return false;
+        }
+        $price = is_array($product) ? ($product['unit_price'] ?? 0) : ($product->unit_price ?? 0);
+
+        return (float)$price > 0;
+    }
+}
+
+if (!function_exists('psfIsOnOrder')) {
+    /**
+     * "Sur commande" — the product is sold but not held in stock.
+     *
+     * @param object|array|null $product
+     */
+    function psfIsOnOrder($product): bool
+    {
+        if (empty($product)) {
+            return false;
+        }
+        $value = is_array($product) ? ($product['availability'] ?? null) : ($product->availability ?? null);
+
+        return $value === 'on_order';
+    }
+}
+
+if (!function_exists('psfWhatsappNumber')) {
+    /**
+     * WhatsApp number from the panel (Social Media Chat setup).
+     * Digits only, so it can be dropped straight into a wa.me link.
+     */
+    function psfWhatsappNumber(): string
+    {
+        try {
+            $row = \Illuminate\Support\Facades\DB::table('business_settings')
+                ->where('type', 'whatsapp')->first();
+            if ($row) {
+                $config = json_decode($row->value, true);
+                if (!empty($config['number'])) {
+                    return preg_replace('/\D+/', '', (string)$config['number']);
+                }
+                if (!empty($config['phone'])) {
+                    return preg_replace('/\D+/', '', (string)$config['phone']);
+                }
+            }
+        } catch (\Throwable $e) {
+            // fall through
+        }
+
+        return '';
+    }
+}
+
+/**
+ * ---------------------------------------------------------------
+ * 3. DEVIS — quote requests (client brief §16)
+ * ---------------------------------------------------------------
+ */
+
+if (!function_exists('psfQuoteMenu')) {
+    /**
+     * Whether the "Demande de devis" entry is shown in the site menus.
+     *
+     * Managed from the panel (business_settings -> `psf_quote_menu`),
+     * so PSF can hide the link without touching a template. Defaults to on.
+     */
+    function psfQuoteMenu(): bool
+    {
+        static $cached = null;
+        if ($cached === null) {
+            $value = getWebConfig(name: 'psf_quote_menu');
+            $cached = $value === null || $value === '' || (bool)$value;
+        }
+
+        return $cached;
+    }
+}
+
+if (!function_exists('psfClientTypes')) {
+    /**
+     * "Type de client" options for the quote form.
+     *
+     * Managed from the panel (business_settings -> `psf_client_types`),
+     * so PSF can add e.g. "Revendeur" later without a developer.
+     *
+     * @return array<int, array{key:string,label:string}>
+     */
+    function psfClientTypes(): array
+    {
+        static $cached = null;
+        if ($cached !== null) {
+            return $cached;
+        }
+
+        try {
+            $row = \Illuminate\Support\Facades\DB::table('business_settings')
+                ->where('type', 'psf_client_types')->first();
+            if ($row && !empty($row->value)) {
+                $decoded = json_decode($row->value, true);
+                if (is_array($decoded) && $decoded !== []) {
+                    return $cached = $decoded;
+                }
+            }
+        } catch (\Throwable $e) {
+            // fall through
+        }
+
+        return $cached = [
+            ['key' => 'particulier', 'label' => 'Particulier'],
+            ['key' => 'plombier',    'label' => 'Plombier'],
+            ['key' => 'entreprise',  'label' => 'Entreprise'],
+        ];
+    }
+}
+
+if (!function_exists('psfQuoteRecipients')) {
+    /**
+     * Where a new quote request is announced.
+     * Both come from the panel; either may be empty.
+     *
+     * @return array{email:string,whatsapp:string}
+     */
+    function psfQuoteRecipients(): array
+    {
+        $email = '';
+        $whatsapp = '';
+        try {
+            $row = \Illuminate\Support\Facades\DB::table('business_settings')
+                ->where('type', 'psf_quote_recipients')->first();
+            if ($row && !empty($row->value)) {
+                $decoded = json_decode($row->value, true);
+                $email = $decoded['email'] ?? '';
+                $whatsapp = $decoded['whatsapp'] ?? '';
+            }
+        } catch (\Throwable $e) {
+            // fall through
+        }
+
+        if ($email === '') {
+            $email = (string)(getWebConfig(name: 'company_email') ?? '');
+        }
+        if ($whatsapp === '') {
+            $whatsapp = psfWhatsappNumber();
+        }
+
+        return ['email' => $email, 'whatsapp' => preg_replace('/\D+/', '', (string)$whatsapp)];
+    }
+}
+
+if (!function_exists('psfWhatsappTemplate')) {
+    /**
+     * A WhatsApp message template from the panel, with a fallback.
+     *
+     * @param string $key      business_settings type
+     * @param string $fallback used only when the setting was never written
+     */
+    function psfWhatsappTemplate(string $key, string $fallback): string
+    {
+        try {
+            $row = \Illuminate\Support\Facades\DB::table('business_settings')
+                ->where('type', $key)->first();
+            $value = $row->value ?? '';
+            if (is_string($value) && trim($value) !== '') {
+                return $value;
+            }
+        } catch (\Throwable $e) {
+            // fall through
+        }
+
+        return $fallback;
+    }
+}
+
+if (!function_exists('psfWhatsappChatUrl')) {
+    /**
+     * The floating "chat with us" button.
+     * Greeting is editable from the panel (`psf_chat_greeting`).
+     */
+    function psfWhatsappChatUrl(): string
+    {
+        $text = psfWhatsappTemplate('psf_chat_greeting', 'Bonjour PSF, j\'ai une question.');
+
+        return 'https://wa.me/' . psfWhatsappNumber() . '?text=' . rawurlencode($text);
+    }
+}
+
+if (!function_exists('psfProductWhatsappUrl')) {
+    /**
+     * Per-product WhatsApp link (client brief §8 — every product has one).
+     *
+     * Which message is used depends on the product:
+     *   no price -> ask for the price   (`psf_price_request_template`)
+     *   priced   -> order the product   (`psf_order_request_template`)
+     *
+     * @param object|array|null $product
+     */
+    function psfProductWhatsappUrl($product): string
+    {
+        return psfHasPrice($product)
+            ? psfOrderRequestUrl($product)
+            : psfPriceRequestUrl($product);
+    }
+}
+
+if (!function_exists('psfOrderRequestUrl')) {
+    /**
+     * "Commander sur WhatsApp" — for products that do have a price.
+     *
+     * @param object|array|null $product
+     */
+    function psfOrderRequestUrl($product): string
+    {
+        $template = psfWhatsappTemplate(
+            'psf_order_request_template',
+            'Bonjour PSF, je souhaite commander ce produit : {product}' . PHP_EOL . '{url}'
+        );
+
+        return 'https://wa.me/' . psfWhatsappNumber() . '?text=' . rawurlencode(psfFillTemplate($template, $product));
+    }
+}
+
+if (!function_exists('psfFillTemplate')) {
+    /**
+     * Replace {product} and {url} in a message template.
+     *
+     * @param object|array|null $product
+     */
+    function psfFillTemplate(string $template, $product): string
+    {
+        $name = '';
+        $slug = '';
+        if (!empty($product)) {
+            $name = is_array($product) ? ($product['name'] ?? '') : ($product->name ?? '');
+            $slug = is_array($product) ? ($product['slug'] ?? '') : ($product->slug ?? '');
+        }
+
+        $url = $slug !== '' ? route('product', $slug) : url('/');
+
+        return str_replace(['{product}', '{url}'], [$name, $url], $template);
+    }
+}
+
+if (!function_exists('psfPriceRequestUrl')) {
+    /**
+     * wa.me link asking PSF for the price of one product.
+     *
+     * The message template is editable from the panel
+     * (business_settings -> `psf_price_request_template`).
+     * {product} and {url} are replaced.
+     *
+     * @param object|array|null $product
+     */
+    function psfPriceRequestUrl($product): string
+    {
+        $template = psfWhatsappTemplate(
+            'psf_price_request_template',
+            'Bonjour PSF, je souhaite connaître le prix et la disponibilité de ce produit : {product}'
+                . PHP_EOL . '{url}'
+        );
+
+        return 'https://wa.me/' . psfWhatsappNumber() . '?text=' . rawurlencode(psfFillTemplate($template, $product));
+    }
+}

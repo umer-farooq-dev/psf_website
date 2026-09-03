@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /login/admin/
+Disallow: /admin/
+Disallow: /cart
+Disallow: /checkout
+
+Sitemap: http://localhost/psf/sitemap.xml

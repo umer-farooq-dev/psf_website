@@ -1,0 +1,21 @@
+psf_about_menu|1
+psf_accent_color|#f5c518
+psf_chat_greeting|
+psf_client_types|[{"key":"particulier","label":"Particulier"}]
+psf_contact_phones|[]
+psf_gallery_categories|["Plomberie"]
+psf_gallery_menu|1
+psf_gallery_per_page|9
+psf_google_business_url|
+psf_hero_ctas|[]
+psf_hidden_home_sections|[]
+psf_hidden_menus|["withdraws","wallet","loyalty_points","chatting","product_update_requests","vendor_reports","theme_menu"]
+psf_map_directions|
+psf_map_embed|
+psf_opening_hours|[]
+psf_order_request_template|
+psf_price_request_template|
+psf_quote_menu|1
+psf_quote_recipients|{"email":"psfcontactbf@gmail.com","whatsapp":"22678244889"}
+psf_search_indexing|1
+psf_slogan|La qualité par excellence

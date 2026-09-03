@@ -1,0 +1,25 @@
+psf_about_menu|1
+psf_accent_color|#f5c518
+psf_chat_greeting|Bonjour PSF, j'ai une question.
+psf_client_types|[{"key":"particulier","label":"Particulier"},{"key":"plombier","label":"Plombier"},{"key":"entreprise","label":"Entreprise"}]
+psf_contact_phones|[{"label":"","number":"+226 78 24 48 89","whatsapp":false}]
+psf_gallery_categories|["Plomberie"]
+psf_gallery_menu|1
+psf_gallery_per_page|9
+psf_google_business_url|
+psf_hero_ctas|[]
+psf_hidden_home_sections|[]
+psf_hidden_menus|["withdraws","wallet","loyalty_points","chatting","product_update_requests","vendor_reports","theme_menu"]
+psf_map_directions|
+psf_map_embed|
+psf_opening_hours|[{"day":"Lundi","hours":"","closed":true},{"day":"Mardi","hours":"","closed":true},{"day":"Mercredi","hours":"","closed":true},{"day":"Jeudi","hours":"","closed":true},{"day":"Vendredi","hours":"","closed":true},{"day":"Samedi","hours":"","closed":true},{"day":"Dimanche","hours":"","closed":true}]
+psf_order_request_template|Bonjour PSF, je souhaite commander ce produit : {product}
+Quantité : {quantity}
+{variation}
+{url}
+psf_price_request_template|Bonjour PSF, je souhaite connaître le prix et la disponibilité de ce produit : {product}
+{url}
+psf_quote_menu|1
+psf_quote_recipients|{"email":"psfcontactbf@gmail.com","whatsapp":"923026517014"}
+psf_search_indexing|1
+psf_slogan|La qualité par excellence

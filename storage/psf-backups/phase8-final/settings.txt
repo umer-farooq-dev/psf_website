@@ -1,0 +1,9 @@
+psf_hidden_menus|["withdraws","wallet","loyalty_points","chatting","product_update_requests","vendor_reports","theme_menu","pos","vendors","delivery_men","vendor_products","refunds","themes_addons"]
+psf_price_request_template|Bonjour PSF, je souhaite connaître le prix de ce produit : {product}
+{url}
+psf_order_request_template|Bonjour PSF, je souhaite commander ce produit : {product}
+{url}
+psf_chat_greeting|Bonjour PSF, j'ai une question.
+psf_client_types|[{"key":"particulier","label":"Particulier"},{"key":"plombier","label":"Plombier"},{"key":"entreprise","label":"Entreprise"}]
+psf_quote_recipients|{"email":"psfcontactbf@gmail.com","whatsapp":"22678244889"}
+psf_quote_menu|1

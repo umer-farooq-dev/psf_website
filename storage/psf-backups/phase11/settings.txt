@@ -1,0 +1,17 @@
+shop_address|Ouagadougou, Boins Yaaré, Burkina Faso
+psf_hidden_menus|["withdraws","wallet","loyalty_points","chatting","product_update_requests","vendor_reports","theme_menu"]
+psf_price_request_template|
+psf_order_request_template|
+psf_chat_greeting|
+psf_client_types|[{"key":"particulier","label":"Particulier"}]
+psf_quote_recipients|{"email":"psfcontactbf@gmail.com","whatsapp":"22678244889"}
+psf_quote_menu|1
+psf_gallery_menu|1
+psf_gallery_per_page|9
+psf_gallery_categories|["Plomberie"]
+psf_contact_phones|[{"label":"Boutique","number":"+226 78 24 48 89","whatsapp":true}]
+psf_opening_hours|[{"day":"Lundi","hours":"07:30 - 18:00","closed":false}]
+psf_map_embed|
+psf_map_directions|
+psf_hidden_home_sections|[]
+psf_hero_ctas|[{"label":"Demander un devis","url":"\/psf\/demande-de-devis"}]

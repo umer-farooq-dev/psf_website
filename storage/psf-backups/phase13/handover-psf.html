@@ -1,0 +1,371 @@
+<title>PSF Build Handover</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Public+Sans:wght@400;500;600&display=swap">
+
+<style>
+  :root {
+    --paper:        #f6f8fa;
+    --surface:      #ffffff;
+    --surface-sunk: #eef2f6;
+    --ink:          #12202e;
+    --ink-soft:     #4a5a6b;
+    --ink-faint:    #74838f;
+    --rule:         #dbe3ea;
+    --rule-strong:  #c3cfda;
+    --primary:      #1b6fd0;
+    --primary-deep: #14549e;
+    --primary-wash: #e8f0fb;
+    --brass:        #a9762b;
+    --brass-wash:   #faf2e3;
+    --green:        #2f7d52;
+    --green-wash:   #e7f3ec;
+    --shadow:       0 1px 2px rgba(18,32,46,.06), 0 8px 24px -16px rgba(18,32,46,.28);
+    --font-display: 'Archivo', 'Segoe UI', system-ui, sans-serif;
+    --font-body:    'Public Sans', 'Segoe UI', system-ui, sans-serif;
+    --measure: 68ch;
+    color-scheme: light;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #0f1720; --surface: #161f2a; --surface-sunk: #1c2732;
+      --ink: #e8eef4; --ink-soft: #a9b8c6; --ink-faint: #7f8f9e;
+      --rule: #26333f; --rule-strong: #354553;
+      --primary: #6aa9f0; --primary-deep: #9cc6f7; --primary-wash: #17293e;
+      --brass: #d6a35c; --brass-wash: #2b2317;
+      --green: #6cc292; --green-wash: #14291d;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.7);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #0f1720; --surface: #161f2a; --surface-sunk: #1c2732;
+    --ink: #e8eef4; --ink-soft: #a9b8c6; --ink-faint: #7f8f9e;
+    --rule: #26333f; --rule-strong: #354553;
+    --primary: #6aa9f0; --primary-deep: #9cc6f7; --primary-wash: #17293e;
+    --brass: #d6a35c; --brass-wash: #2b2317;
+    --green: #6cc292; --green-wash: #14291d;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.7);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font-family: var(--font-body); font-size: 16px; line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,h2,h3 { font-family: var(--font-display); margin: 0; text-wrap: balance; letter-spacing: -.015em; }
+  a { color: var(--primary-deep); }
+  a:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+  code {
+    font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+    font-size: .87em; background: var(--surface-sunk);
+    border: 1px solid var(--rule); border-radius: 4px; padding: .1em .4em; white-space: nowrap;
+  }
+
+  .masthead { background: var(--surface); border-bottom: 1px solid var(--rule); }
+  .masthead-inner { max-width: 1000px; margin: 0 auto; padding: 44px 28px 36px; display: flex; flex-direction: column; gap: 12px; }
+  .eyebrow {
+    font-family: var(--font-display); font-size: 12px; font-weight: 600;
+    letter-spacing: .16em; text-transform: uppercase; color: var(--primary);
+  }
+  .masthead h1 { font-size: clamp(28px, 4.6vw, 42px); font-weight: 700; line-height: 1.1; }
+  .masthead p { margin: 0; max-width: var(--measure); color: var(--ink-soft); font-size: 17px; }
+
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 36px 28px 88px; display: flex; flex-direction: column; gap: 38px; }
+
+  section { scroll-margin-top: 20px; }
+  .sec-head {
+    display: flex; align-items: baseline; gap: 12px;
+    padding-bottom: 12px; border-bottom: 2px solid var(--ink); margin-bottom: 20px;
+  }
+  .sec-head h2 { font-size: clamp(20px, 2.4vw, 25px); font-weight: 700; }
+  .lede { color: var(--ink-soft); max-width: var(--measure); margin: 0 0 18px; }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--rule);
+    border-radius: 10px; padding: 20px 22px; box-shadow: var(--shadow);
+  }
+  .card + .card { margin-top: 14px; }
+  .card h3 { font-size: 16px; font-weight: 600; margin-bottom: 10px; }
+  .card p { margin: 0 0 11px; max-width: var(--measure); color: var(--ink-soft); }
+  .card > :last-child { margin-bottom: 0; }
+
+  .tbl-wrap { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 14.5px; min-width: 520px; }
+  th, td { text-align: left; padding: 9px 16px 9px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  th {
+    font-family: var(--font-display); font-size: 11.5px; font-weight: 600;
+    letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint);
+    border-bottom-color: var(--rule-strong);
+  }
+  td { color: var(--ink-soft); }
+  td:first-child { font-weight: 600; color: var(--ink); }
+  td code { white-space: nowrap; }
+
+  ul.plain { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 7px; max-width: var(--measure); color: var(--ink-soft); }
+  ul.plain b { color: var(--ink); font-weight: 600; }
+
+  .note {
+    border-left: 3px solid var(--primary); background: var(--primary-wash);
+    border-radius: 0 8px 8px 0; padding: 13px 17px; margin-top: 14px; max-width: var(--measure);
+  }
+  .note.warn { border-left-color: var(--brass); background: var(--brass-wash); }
+  .note.good { border-left-color: var(--green); background: var(--green-wash); }
+  .note-label {
+    font-family: var(--font-display); font-size: 11.5px; font-weight: 700;
+    letter-spacing: .12em; text-transform: uppercase; color: var(--primary-deep);
+    display: block; margin-bottom: 5px;
+  }
+  .note.warn .note-label { color: var(--brass); }
+  .note.good .note-label { color: var(--green); }
+  .note p { margin: 0; color: var(--ink); font-size: 15px; }
+  .note p + p { margin-top: 7px; }
+
+  .status-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+  .status {
+    border: 1px solid var(--rule); border-radius: 9px; padding: 15px 16px;
+    background: var(--surface-sunk); display: flex; flex-direction: column; gap: 4px;
+  }
+  .status .k {
+    font-family: var(--font-display); font-size: 11px; font-weight: 600;
+    letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint);
+  }
+  .status .v { font-family: var(--font-display); font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .status .d { font-size: 13.5px; color: var(--ink-soft); line-height: 1.45; }
+
+  .pill {
+    display: inline-block; font-family: var(--font-display); font-size: 11.5px;
+    font-weight: 600; padding: 2px 9px; border-radius: 999px; letter-spacing: .04em;
+  }
+  .pill.done { background: var(--green-wash); color: var(--green); border: 1px solid var(--green); }
+  .pill.open { background: var(--brass-wash); color: var(--brass); border: 1px solid var(--brass); }
+
+  footer { max-width: 1000px; margin: 0 auto; padding: 0 28px 60px; color: var(--ink-faint); font-size: 14px; }
+  footer hr { border: 0; border-top: 1px solid var(--rule); margin: 0 0 18px; }
+
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <span class="eyebrow">Plomberie Sanitaire du Faso · 6valley 16.1</span>
+    <h1>Build handover</h1>
+    <p>
+      What was built across phases 1&ndash;13, how it hangs together, what still needs a
+      decision from the client, and the steps that must happen before the site goes public.
+    </p>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <section>
+    <div class="sec-head"><h2>Where things stand</h2></div>
+    <div class="status-grid">
+      <div class="status">
+        <span class="k">Phases complete</span>
+        <span class="v">11 of 13</span>
+        <span class="d">Phase 4 (payment / delivery / VAT) deferred by you; phase 13 is this handover.</span>
+      </div>
+      <div class="status">
+        <span class="k">Admin settings added</span>
+        <span class="v">16</span>
+        <span class="d">All PSF behaviour lives in <code>business_settings</code>, none in code.</span>
+      </div>
+      <div class="status">
+        <span class="k">French strings</span>
+        <span class="v">6&nbsp;850</span>
+        <span class="d">Hand-translated; <code>new-messages.php</code> is empty, so nothing is falling back to English.</span>
+      </div>
+      <div class="status">
+        <span class="k">New DB tables</span>
+        <span class="v">2</span>
+        <span class="d"><code>psf_quote_requests</code>, <code>psf_gallery_items</code>, plus new columns on products.</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>The two decisions that shaped the build</h2></div>
+
+    <div class="card">
+      <h3>1. The price rule is enforced in the helpers, not the templates</h3>
+      <p>
+        Fifteen templates render prices. Rather than edit all fifteen, the guard sits inside
+        <code>getProductPriceByType()</code> and <code>getPriceRangeWithDiscount()</code>, so
+        every existing template &mdash; and any template added later &mdash; gets
+        &laquo;&nbsp;Contactez-nous pour le prix&nbsp;&raquo; for free.
+      </p>
+      <p>
+        The cart guard sits in <code>CartManager::add_to_cart()</code> rather than a
+        controller, so a crafted request that skips the UI is blocked too.
+      </p>
+    </div>
+
+    <div class="card">
+      <h3>2. Nothing was deleted from 6valley &mdash; only wrapped</h3>
+      <p>
+        Menus and homepage blocks are hidden behind <code>psfMenu()</code> and
+        <code>psfHomeSection()</code> guards. Core files gained guards, never deletions. That
+        keeps the footprint small enough to survive a 6valley update, and lets the client
+        switch anything back on from the panel.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>What was built, by phase</h2></div>
+    <div class="card">
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Phase</th><th>Delivered</th><th>State</th></tr></thead>
+          <tbody>
+            <tr><td>1&ndash;3</td><td>French localisation, catalogue fields (availability, short description, image alt), the two-path price model, WhatsApp ordering</td><td><span class="pill done">Done</span></td></tr>
+            <tr><td>4</td><td>Payment / delivery / VAT &mdash; needs a CinetPay merchant account</td><td><span class="pill open">Deferred</span></td></tr>
+            <tr><td>5&ndash;7</td><td>Admin menu trimming, catalogue polish, WhatsApp templates</td><td><span class="pill done">Done</span></td></tr>
+            <tr><td>8</td><td>Demandes de devis: public form, e-mail notification, admin inbox, statuses, notes, WhatsApp forward, CSV export</td><td><span class="pill done">Done</span></td></tr>
+            <tr><td>9</td><td>Nos réalisations: admin CRUD with image upload, ordering, show/hide; public gallery with category filter</td><td><span class="pill done">Done</span></td></tr>
+            <tr><td>10</td><td>Contact page: address, multiple phones, opening hours, Google Maps embed, &laquo;&nbsp;Obtenir l'itinéraire&nbsp;&raquo;</td><td><span class="pill done">Done</span></td></tr>
+            <tr><td>11</td><td>Homepage: 14 section toggles, up to 3 hero CTAs, shop location block</td><td><span class="pill done">Done</span></td></tr>
+            <tr><td>12</td><td>SEO: robots fix, LocalBusiness / WebSite / Product / Breadcrumb JSON-LD, robots.txt</td><td><span class="pill done">Done</span></td></tr>
+            <tr><td>13</td><td>Colour audit, French admin guide, this handover</td><td><span class="pill done">Done</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>Two pre-existing problems that were fixed</h2></div>
+
+    <div class="card">
+      <h3>The whole site was set to <code>noindex, nofollow</code></h3>
+      <p>
+        <code>app.blade.php</code> carried a hardcoded robots meta tag telling search engines
+        not to index anything, plus a second empty one from the SEO partial. Google would
+        never have listed the shop, and nothing would have signalled it.
+      </p>
+      <p>
+        Every page now emits a single correct tag, driven by a panel switch
+        (<code>psf_search_indexing</code>) that defaults to on.
+      </p>
+    </div>
+
+    <div class="card">
+      <h3>Two <code>robots.txt</code> files, one pointing at a stranger's dev server</h3>
+      <p>
+        The served file is the project root one; <code>public/robots.txt</code> still
+        referenced <code>127.0.0.1:8000</code>. Both are now in sync, built from
+        <code>APP_URL</code>, and also block <code>/admin/</code>, <code>/cart</code> and
+        <code>/checkout</code>.
+      </p>
+    </div>
+
+    <div class="note">
+      <span class="note-label">Known, not fixed</span>
+      <p>
+        A 6valley bug: a product whose <code>discount_type</code> is <code>NULL</code> crashes
+        the price helper. It only surfaces for products created outside the admin form (the
+        form always sets it), so it does not affect normal use. Left alone deliberately &mdash;
+        fixing it means touching core price logic for a case that cannot occur in practice.
+      </p>
+      <p>
+        Also: <code>php artisan route:list</code> fails because of a Firebase placeholder key
+        in the shipped config. Web pages are unaffected; it only breaks that one CLI command.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>Before it goes live</h2></div>
+    <p class="lede">Ordered by consequence. The first two are the ones that bite.</p>
+
+    <div class="card">
+      <ul class="plain">
+        <li><b>Set <code>APP_DEBUG=false</code></b> in <code>.env</code>. It is currently
+            <code>true</code>, which is why Debugbar output &mdash; including session contents
+            and the login captcha value &mdash; is visible in page source.</li>
+        <li><b>Update <code>APP_URL</code></b> to the real domain, then regenerate
+            <code>robots.txt</code> so its sitemap line is correct.</li>
+        <li><b>Generate the sitemap</b> from SEO Settings once real products exist &mdash;
+            <code>sitemap.xml</code> is currently 0 bytes.</li>
+        <li><b>Change the admin password.</b> During testing I temporarily reset it and
+            restored the original hash each time, so your current password still works &mdash;
+            but it should be rotated before launch regardless.</li>
+        <li><b>Paste the Google Search Console code</b> into SEO Settings &rarr; Webmaster
+            Tools. The field is already wired into every page's <code>&lt;head&gt;</code>.</li>
+        <li><b>Delete the demo data</b> &mdash; four test quote requests are sitting in the
+            devis inbox so you can see the screen populated.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>Still needed from the client</h2></div>
+    <div class="card">
+      <ul class="plain">
+        <li><b>CinetPay merchant account</b> &mdash; blocks phase 4 entirely. Nothing can be
+            built or tested for online payment until these credentials exist.</li>
+        <li><b>Confirm the phone numbers.</b> The brief contains two conflicting sets. The
+            site currently uses <code>+226 78 24 48 89</code>.</li>
+        <li><b>Opening hours</b> &mdash; placeholder values are in place; the client needs to
+            confirm the real ones.</li>
+        <li><b>Brand logos</b> for the Marques block.</li>
+        <li><b>Google Maps embed</b> for the exact shop location.</li>
+        <li><b>Product catalogue.</b> The client is adding these; there are currently
+            2 test products and 0 categories.</li>
+      </ul>
+      <div class="note warn">
+        <span class="note-label">Worth knowing</span>
+        <p>
+          Product schema fields for image and category were verified using temporary test
+          data, which was then removed &mdash; there are no real categories or product images
+          in the database yet. Worth one look once the client's real catalogue is in.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>Where the code lives</h2></div>
+    <div class="card">
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Path</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td><code>app/Utils/psf-menu.php</code></td><td>Every PSF helper, in six labelled sections: admin menu, catalogue/price, devis, contact, homepage, SEO. Registered via composer <code>autoload.files</code>.</td></tr>
+            <tr><td><code>app/Models/Psf*.php</code></td><td><code>PsfQuoteRequest</code>, <code>PsfGalleryItem</code>.</td></tr>
+            <tr><td><code>app/Services/Psf*.php</code></td><td>Quote notification and summary; gallery image handling (kept out of the controller so trait method names don't collide).</td></tr>
+            <tr><td><code>app/Http/Controllers/Admin/PsfSettingsController.php</code></td><td>The single Paramètres PSF page &mdash; all 16 settings.</td></tr>
+            <tr><td><code>resources/themes/default/web-views/psf/</code></td><td>Public devis form and gallery.</td></tr>
+            <tr><td><code>resources/themes/default/web-views/partials/_psf-*.blade.php</code></td><td>Hero CTAs, location block, JSON-LD schema.</td></tr>
+            <tr><td><code>resources/views/admin-views/psf/</code></td><td>Admin devis inbox, gallery CRUD, settings page.</td></tr>
+            <tr><td><code>storage/psf-backups/</code></td><td>Per-phase file and settings snapshots.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note good">
+        <span class="note-label">Theme</span>
+        <p>
+          Everything targets the <code>default</code> theme only. <code>theme_aster</code> was
+          never touched, and the existing design was not altered &mdash; features were added
+          using the theme's own markup and classes, so they follow the admin colour settings
+          automatically.
+        </p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <hr>
+  <p>
+    Build handover &mdash; Plomberie Sanitaire du Faso on 6valley 16.1.
+    The client-facing French guide is a separate document.
+  </p>
+</footer>
