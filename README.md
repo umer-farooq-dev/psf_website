@@ -3,8 +3,6 @@
 Catalogue and quotation website for Plomberie Sanitaire du Faso, a plumbing and
 sanitary equipment supplier in Ouagadougou, Burkina Faso.
 
-Built on **6valley Multivendor eCommerce 16.1** (Laravel 12 / PHP 8.2), running the
-`default` theme. Site language is French.
 
 ## What is specific to PSF
 
