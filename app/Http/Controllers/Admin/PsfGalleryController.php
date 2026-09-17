@@ -60,6 +60,7 @@ class PsfGalleryController extends BaseController
         $item = new PsfGalleryItem($this->service->payload($request));
         $item->image = $this->service->storeImage($request);
         $item->save();
+        $this->service->saveTexts($item, $request);
 
         Toastr::success(translate('added_successfully'));
 
@@ -99,6 +100,7 @@ class PsfGalleryController extends BaseController
             $this->service->removeImage($old);
         }
         $item->save();
+        $this->service->saveTexts($item, $request);
 
         Toastr::success(translate('updated_successfully'));
 

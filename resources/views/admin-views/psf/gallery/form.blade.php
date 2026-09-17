@@ -22,12 +22,10 @@
                 <div class="card-body">
                     <div class="row g-3">
                         <div class="col-md-8">
-                            <label class="form-label" for="title">
+                            <label class="form-label">
                                 {{ translate('Title') }} <span class="text-danger">*</span>
                             </label>
-                            <input type="text" class="form-control" id="title" name="title" required
-                                   value="{{ old('title', $item->title ?? '') }}"
-                                   placeholder="{{ translate('e_g_Installation_sanitaire_villa_Ouaga_2000') }}">
+                            @include('admin-views.psf.partials._lang-input', ['name' => 'title', 'values' => old('title', psfRecordTexts($item, 'title')), 'placeholder' => translate('e_g_Installation_sanitaire_villa_Ouaga_2000')])
                         </div>
 
                         <div class="col-md-4">
@@ -37,23 +35,20 @@
                                    value="{{ old('category', $item->category ?? '') }}">
                             <datalist id="psf-gallery-categories">
                                 @foreach ($categories as $option)
-                                    <option value="{{ $option }}"></option>
+                                    <option value="{{ $option }}">{{ psfGalleryCategoryLabel($option) }}</option>
                                 @endforeach
                             </datalist>
                             <small class="text-muted">{{ translate('Choose_one_or_type_a_new_one') }}</small>
                         </div>
 
                         <div class="col-12">
-                            <label class="form-label" for="description">{{ translate('description') }}</label>
-                            <textarea class="form-control" id="description" name="description"
-                                      rows="4">{{ old('description', $item->description ?? '') }}</textarea>
+                            <label class="form-label">{{ translate('description') }}</label>
+                            @include('admin-views.psf.partials._lang-input', ['name' => 'description', 'values' => old('description', psfRecordTexts($item, 'description')), 'textarea' => 4])
                         </div>
 
                         <div class="col-md-4">
-                            <label class="form-label" for="location">{{ translate('Location') }}</label>
-                            <input type="text" class="form-control" id="location" name="location"
-                                   value="{{ old('location', $item->location ?? '') }}"
-                                   placeholder="Ouagadougou">
+                            <label class="form-label">{{ translate('Location') }}</label>
+                            @include('admin-views.psf.partials._lang-input', ['name' => 'location', 'values' => old('location', psfRecordTexts($item, 'location'))])
                         </div>
 
                         <div class="col-md-4">
@@ -80,7 +75,7 @@
                         <div class="col-md-6">
                             <label class="form-label" for="image">
                                 {{ translate('image') }}
-                                <small class="text-muted">(jpg, png, webp — {{ translate('Max_5_MB') }})</small>
+                                <small class="text-muted">(jpg, png, webp — {{ translate('Max_5_MB') }} — {{ translate('recommended_size') }} 600 × 500 px)</small>
                             </label>
                             <input type="file" class="form-control" id="image" name="image"
                                    accept="image/jpeg,image/png,image/webp">
@@ -97,11 +92,10 @@
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label" for="image_alt_text">
+                            <label class="form-label">
                                 {{ translate('Image_Alt_Text') }}
                             </label>
-                            <input type="text" class="form-control" id="image_alt_text" name="image_alt_text"
-                                   value="{{ old('image_alt_text', $item->image_alt_text ?? '') }}">
+                            @include('admin-views.psf.partials._lang-input', ['name' => 'image_alt_text', 'values' => old('image_alt_text', psfRecordTexts($item, 'image_alt_text'))])
                             <small class="text-muted">
                                 {{ translate('Describes_the_image_for_search_engines_and_screen_readers') }}
                             </small>

@@ -118,32 +118,47 @@
                                                    placeholder="{{ translate('enter_url') }}" value="{{ $banner['url'] }}">
                                         </div>
 
-                                        @if(theme_root_path() == 'theme_fashion')
+                                        @if(theme_root_path() == 'theme_fashion' || psfDesign() === 'pixio')
                                             <div
                                                 class="form-group mt-4 input-field-for-main-banner {{ $banner['banner_type'] !='Main Banner'?'d-none':''}}">
                                                 <label for="title"
                                                     class="form-label">{{ translate('Title') }}</label>
+                                                @if (psfDesign() === 'pixio')
+                                                    {{-- PSF: one text per site language --}}
+                                                    @include('admin-views.psf.partials._lang-input', ['name' => 'title', 'values' => psfRecordTexts($banner, 'title')])
+                                                @else
                                                 <input type="text" name="title" class="form-control" id="title"
                                                     placeholder="{{ translate('Enter_banner_title') }}"
                                                     value="{{ $banner['title'] }}">
+                                                @endif
                                             </div>
                                             <div
                                                 class="form-group mb-0 input-field-for-main-banner {{ $banner['banner_type'] !='Main Banner'?'d-none':''}}">
                                                 <label for="sub_title" class="form-label">
                                                     {{ translate('Sub_Title') }}
                                                 </label>
+                                                @if (psfDesign() === 'pixio')
+                                                    {{-- PSF: one text per site language --}}
+                                                    @include('admin-views.psf.partials._lang-input', ['name' => 'sub_title', 'values' => psfRecordTexts($banner, 'sub_title')])
+                                                @else
                                                 <input type="text" name="sub_title" class="form-control"
                                                     id="sub_title"
                                                     placeholder="{{ translate('Enter_banner_sub_title') }}"
                                                     value="{{ $banner['sub_title'] }}">
+                                                @endif
                                             </div>
                                             <div
                                                 class="form-group mt-4 input-field-for-main-banner {{ $banner['banner_type'] !='Main Banner'?'d-none':''}}">
                                                 <label for="button_text"
                                                        class="form-label">{{ translate('Button_Text') }}</label>
+                                                @if (psfDesign() === 'pixio')
+                                                    {{-- PSF: one text per site language --}}
+                                                    @include('admin-views.psf.partials._lang-input', ['name' => 'button_text', 'values' => psfRecordTexts($banner, 'button_text')])
+                                                @else
                                                 <input type="text" name="button_text" class="form-control" id="button_text"
                                                        placeholder="{{ translate('Enter_button_text') }}"
                                                        value="{{ $banner['button_text'] }}">
+                                                @endif
                                             </div>
                                             <div
                                                 class="form-group mt-4 mb-0 input-field-for-main-banner {{ $banner['banner_type'] !='Main Banner'?'d-none':''}}">
@@ -244,7 +259,7 @@
         function getThemeWiseRatio() {
             let bannerType = elementBannerTypeSelect.val();
             let theme = '{{ theme_root_path() }}';
-            let themeRatio = {!! json_encode(THEME_RATIO) !!};
+            let themeRatio = {!! json_encode(psfBannerRatios()) !!};
             let getRatio = themeRatio[theme][bannerType];
             $('#theme_ratio').text(getRatio);
         }

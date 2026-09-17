@@ -45,11 +45,12 @@ class PsfGalleryService
     public function payload(Request $request): array
     {
         return [
-            'title'          => $request['title'],
-            'description'    => $request['description'],
-            'image_alt_text' => $request['image_alt_text'],
+            // the columns keep the default language; every language goes to translations (saveTexts)
+            'title'          => $this->defaultText($request['title']),
+            'description'    => $this->defaultText($request['description']),
+            'image_alt_text' => $this->defaultText($request['image_alt_text']),
             'category'       => $request['category'],
-            'location'       => $request['location'],
+            'location'       => $this->defaultText($request['location']),
             'completed_on'   => $request['completed_on'] ?: null,
             'sort_order'     => (int)($request['sort_order'] ?? 0),
             'status'         => $request->has('status'),
@@ -62,12 +63,17 @@ class PsfGalleryService
     public function rules(): array
     {
         return [
-            'title'          => 'required|string|max:191',
-            'description'    => 'nullable|string|max:5000',
+            'title'          => 'required|array',
+            'title.' . psfDefaultLanguageCode() => 'required|string|max:191',
+            'title.*'        => 'nullable|string|max:191',
+            'description'    => 'nullable|array',
+            'description.*'  => 'nullable|string|max:5000',
             'image'          => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
-            'image_alt_text' => 'nullable|string|max:191',
+            'image_alt_text' => 'nullable|array',
+            'image_alt_text.*' => 'nullable|string|max:191',
             'category'       => 'nullable|string|max:100',
-            'location'       => 'nullable|string|max:191',
+            'location'       => 'nullable|array',
+            'location.*'     => 'nullable|string|max:191',
             'completed_on'   => 'nullable|date',
             'sort_order'     => 'nullable|integer|min:0|max:9999',
         ];
@@ -80,8 +86,28 @@ class PsfGalleryService
     {
         return [
             'title.required' => translate('Title_is_required'),
+            'title.' . psfDefaultLanguageCode() . '.required' => translate('Title_is_required'),
             'image.image'    => translate('The_file_must_be_an_image'),
             'image.max'      => translate('Max_5_MB'),
         ];
+    }
+
+    private function defaultText(mixed $value): ?string
+    {
+        $text = psfTextFromInput($value)[psfDefaultLanguageCode()] ?? '';
+
+        return $text !== '' ? $text : null;
+    }
+
+    /**
+     * Title, description, location and alt text in every site language.
+     */
+    public function saveTexts(\App\Models\PsfGalleryItem $item, Request $request): void
+    {
+        $fields = [];
+        foreach (['title', 'description', 'location', 'image_alt_text'] as $field) {
+            $fields[$field] = psfTextFromInput($request[$field]);
+        }
+        psfSaveTranslations($item, $fields);
     }
 }

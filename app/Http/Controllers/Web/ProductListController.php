@@ -207,7 +207,8 @@ class ProductListController extends Controller
 
         $data = self::getProductListRequestData(request: $request);
         $productListData = ProductManager::getProductListData(request: $request);
-        $products = $productListData->paginate(20)->appends($data);
+        // PSF: page size chosen in the shop toolbar (20 on the classic design)
+        $products = $productListData->paginate(psfProductsPerPage())->appends($data);
 
         if ($request->ajax()) {
             return response()->json([
@@ -376,6 +377,11 @@ class ProductListController extends Controller
             'search_category_value' => $request['search_category_value'],
             'product_name' => $request['product_name'],
             'page' => $request['page'] ?? 1,
+            // PSF: shop filters of the new design, kept on the pagination links
+            'color_ids' => $request['color_ids'],
+            'attribute_values' => $request['attribute_values'],
+            'tag_id' => $request['tag_id'],
+            'per_page' => $request['per_page'],
         ];
     }
 
@@ -404,7 +410,7 @@ class ProductListController extends Controller
 
         $productListData = ProductManager::getProductListData(request: $request, type: 'flash-deals');
         $ratings = self::getProductsRatingOneToFiveAsArray(productQuery: $productListData);
-        $products = $productListData->paginate(20)->appends($data);
+        $products = $productListData->paginate(psfProductsPerPage())->appends($data);
         $getProductIds = $products->pluck('id')->toArray();
 
         if ($request['ratings'] != null) {

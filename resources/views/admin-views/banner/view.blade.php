@@ -120,27 +120,42 @@
                                                    placeholder="{{ translate('Enter_url') }}">
                                         </div>
 
-                                        @if(theme_root_path() == 'theme_fashion')
+                                        @if(theme_root_path() == 'theme_fashion' || psfDesign() === 'pixio')
                                             <div class="form-group mt-4 input-field-for-main-banner">
                                                 <label for="title" class="form-label">
                                                     {{ translate('Title') }}
                                                 </label>
+                                                @if (psfDesign() === 'pixio')
+                                                    {{-- PSF: one text per site language --}}
+                                                    @include('admin-views.psf.partials._lang-input', ['name' => 'title', 'values' => psfTextArray('')])
+                                                @else
                                                 <input type="text" name="title" class="form-control" id="title"
                                                     placeholder="{{ translate('Enter_banner_title') }}">
+                                                @endif
                                             </div>
                                             <div class="form-group mb-0 input-field-for-main-banner">
                                                 <label for="sub_title" class="form-label">
                                                     {{ translate('Sub_Title') }}
                                                 </label>
+                                                @if (psfDesign() === 'pixio')
+                                                    {{-- PSF: one text per site language --}}
+                                                    @include('admin-views.psf.partials._lang-input', ['name' => 'sub_title', 'values' => psfTextArray('')])
+                                                @else
                                                 <input type="text" name="sub_title" class="form-control"
                                                     id="sub_title" placeholder="{{ translate('Enter_banner_sub_title') }}">
+                                                @endif
                                             </div>
                                             <div class="form-group mt-4 input-field-for-main-banner">
                                                 <label for="button_text" class="form-label">
                                                     {{ translate('Button_Text') }}
                                                 </label>
+                                                @if (psfDesign() === 'pixio')
+                                                    {{-- PSF: one text per site language --}}
+                                                    @include('admin-views.psf.partials._lang-input', ['name' => 'button_text', 'values' => psfTextArray('')])
+                                                @else
                                                 <input type="text" name="button_text" class="form-control" id="button_text"
                                                     placeholder="{{ translate('Enter_button_text') }}">
+                                                @endif
                                             </div>
                                             <div class="form-group mt-4 mb-0 input-field-for-main-banner">
                                                 <label for="background_color" class="form-label">
@@ -366,7 +381,7 @@
         function getThemeWiseRatio() {
             let banner_type = elementBannerTypeSelect.val();
             let theme = '{{ theme_root_path() }}';
-            let theme_ratio = {!! json_encode(THEME_RATIO) !!};
+            let theme_ratio = {!! json_encode(psfBannerRatios()) !!};
             let get_ratio = theme_ratio[theme][banner_type];
             $('#theme_ratio').text(get_ratio);
         }

@@ -1529,7 +1529,7 @@ class ProductManager
 
     public static function getPriorityWiseFlashDealsProductsQuery($id = null, $userId = null): array
     {
-        $cacheKey = 'cache_flash_deal_' . ($id ?? 'default');
+        $cacheKey = 'cache_flash_deal_' . ($id ?? 'default') . '_' . getDefaultLanguage();
         $cacheKeys = Cache::get(CACHE_FLASH_DEAL_KEYS, []);
 
         if (!in_array($cacheKey, $cacheKeys)) {
@@ -2229,6 +2229,24 @@ class ProductManager
                     foreach ($request['color_ids'] as $color) {
                         $query->orWhere('colors', 'like', '%' . $color . '%');
                     }
+                });
+            })
+            // PSF: attribute values picked in the shop filter ("Diamètre 25 mm"…).
+            // A product has to offer every picked value.
+            ->when($request->has('attribute_values') && is_array($request['attribute_values']), function ($query) use ($request) {
+                foreach (array_filter($request['attribute_values'], 'is_string') as $value) {
+                    $needle = addcslashes(json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), '%_\\');
+                    $query->where(function ($query) use ($needle, $value) {
+                        $query->where('choice_options', 'like', '%' . $needle . '%')
+                            ->orWhere('choice_options', 'like', '%' . addcslashes(json_encode($value), '%_\\') . '%');
+                    });
+                }
+                return $query;
+            })
+            // PSF: product tag picked in the shop filter
+            ->when(!empty($request['tag_id']) && is_numeric($request['tag_id']), function ($query) use ($request) {
+                return $query->whereHas('tags', function ($query) use ($request) {
+                    return $query->where('tags.id', (int) $request['tag_id']);
                 });
             })
             ->when($request['data_from'] == 'top-rated', function ($query) use ($request) {

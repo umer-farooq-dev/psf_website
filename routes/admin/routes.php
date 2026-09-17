@@ -694,6 +694,11 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['admin', '
         Route::controller(\App\Http\Controllers\Admin\PsfSettingsController::class)->group(function () {
             Route::get('/', 'index')->name('index');
             Route::post('/', 'update')->name('update');
+            // storefront design has its own form, so saving it never touches
+            // the other PSF settings (and vice versa)
+            Route::post('design', 'updateDesign')->name('design');
+            Route::post('design-content', 'updateDesignContent')->name('design-content');
+            Route::post('texts', 'updateTexts')->name('texts');
         });
     });
 

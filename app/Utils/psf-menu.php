@@ -248,12 +248,38 @@ if (!function_exists('psfGalleryCategories')) {
             $decoded = ['Plomberie', 'Sanitaire', 'Chauffage', 'Chantier'];
         }
 
+        // each category is its label in the default language (the key saved on
+        // a réalisation); psfGalleryCategoryLabel() gives the visitor's language
         $cached = array_values(array_filter(array_map(
-            static fn ($label) => trim((string)$label),
+            static fn ($label) => psfTextArray($label)[psfDefaultLanguageCode()] ?: psfText($label),
             $decoded
         )));
 
         return $cached;
+    }
+}
+
+if (!function_exists('psfGalleryCategoryLabel')) {
+    /**
+     * A réalisation category shown in the visitor's language.
+     */
+    function psfGalleryCategoryLabel(?string $key): string
+    {
+        $key = trim((string)$key);
+        if ($key === '') {
+            return '';
+        }
+
+        $stored = getWebConfig(name: 'psf_gallery_categories');
+        $stored = is_string($stored) ? json_decode($stored, true) : $stored;
+        foreach ((array)$stored as $category) {
+            $texts = psfTextArray($category);
+            if (mb_strtolower($texts[psfDefaultLanguageCode()] ?? '') === mb_strtolower($key)) {
+                return psfText($category) ?: $key;
+            }
+        }
+
+        return $key;
     }
 }
 
@@ -316,7 +342,7 @@ if (!function_exists('psfSlogan')) {
      */
     function psfSlogan(): string
     {
-        return trim((string)(getWebConfig(name: 'psf_slogan') ?: ''));
+        return psfText(getWebConfig(name: 'psf_slogan'));
     }
 }
 
@@ -489,6 +515,23 @@ if (!function_exists('psfHomeSectionOptions')) {
      */
     function psfHomeSectionOptions(): array
     {
+        // the new design has its own homepage (psf_pixio/web-views/home.blade.php)
+        if (function_exists('psfDesign') && psfDesign() === 'pixio') {
+            return [
+                'hero',
+                'hero_ctas',
+                'categories',
+                'featured_products',
+                'flash_deal',
+                'video',
+                'popular_products',
+                'section_banner',
+                'brands',
+                'realisations',
+                'instagram',
+            ];
+        }
+
         return [
             'hero_ctas',
             'flash_deal',
@@ -563,7 +606,7 @@ if (!function_exists('psfHeroCtas')) {
         $ctas = [];
         if (is_array($decoded)) {
             foreach ($decoded as $row) {
-                $label = trim((string)($row['label'] ?? ''));
+                $label = psfText($row['label'] ?? '');
                 $url = trim((string)($row['url'] ?? ''));
                 if ($label === '' || $url === '') {
                     continue;
@@ -622,7 +665,7 @@ if (!function_exists('psfContactPhones')) {
                     continue;
                 }
                 $phones[] = [
-                    'label'    => trim((string)($row['label'] ?? '')),
+                    'label'    => psfText($row['label'] ?? ''),
                     'number'   => $number,
                     'whatsapp' => (bool)($row['whatsapp'] ?? false),
                 ];
@@ -663,13 +706,13 @@ if (!function_exists('psfOpeningHours')) {
         $days = [];
         if (is_array($decoded)) {
             foreach ($decoded as $row) {
-                $day = trim((string)($row['day'] ?? ''));
+                $day = psfText($row['day'] ?? '');
                 if ($day === '') {
                     continue;
                 }
                 $days[] = [
                     'day'    => $day,
-                    'hours'  => trim((string)($row['hours'] ?? '')),
+                    'hours'  => psfText($row['hours'] ?? ''),
                     'closed' => (bool)($row['closed'] ?? false),
                 ];
             }
@@ -736,10 +779,11 @@ if (!function_exists('psfDefaultOpeningHours')) {
      */
     function psfDefaultOpeningHours(): array
     {
-        $week = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+        // Monday first; each day named in the site languages, from the language files
+        $week = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
         return array_map(
-            static fn (string $day) => ['day' => $day, 'hours' => '', 'closed' => $day === 'Dimanche'],
+            static fn (string $day) => ['day' => psfTranslationsOf($day), 'hours' => '', 'closed' => $day === 'sunday'],
             $week
         );
     }
@@ -819,7 +863,10 @@ if (!function_exists('psfClientTypes')) {
             if ($row && !empty($row->value)) {
                 $decoded = json_decode($row->value, true);
                 if (is_array($decoded) && $decoded !== []) {
-                    return $cached = $decoded;
+                    return $cached = array_map(
+                        static fn ($type) => ['key' => (string)($type['key'] ?? ''), 'label' => psfText($type['label'] ?? '')],
+                        $decoded
+                    );
                 }
             }
         } catch (\Throwable $e) {
@@ -1012,3 +1059,7 @@ if (!function_exists('psfPriceRequestUrl')) {
         return 'https://wa.me/' . psfWhatsappNumber() . '?text=' . rawurlencode(psfFillTemplate($template, $product));
     }
 }
+
+// PSF: storefront design helpers live in their own file; loading it from here
+// keeps composer's autoload list untouched, so a deploy needs no dump-autoload.
+require_once __DIR__ . '/psf-design.php';

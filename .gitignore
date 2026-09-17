@@ -35,3 +35,9 @@ storage/oauth-public.key
 # PSF: deployment bundles and generated banners are build output, not source
 /psf-deploy.zip
 /storage/psf-deploy/
+/storage/psf-tools/
+
+# PSF: the Pixio template as delivered (reference only — the storefront uses
+# its own copy in resources/themes/psf_pixio)
+/newdesignfrontend/
+/newdesignfrontend.zip

@@ -150,7 +150,7 @@ if (!function_exists('units')) {
 if (!function_exists('getVendorProductsCount')) {
     function getVendorProductsCount(string $type): int
     {
-        $products = Cache::remember(CACHE_FOR_VENDOR_ALL_PRODUCT_LIST, CACHE_FOR_7_DAYS, function () {
+        $products = Cache::remember(psfLanguageCacheKey(CACHE_FOR_VENDOR_ALL_PRODUCT_LIST), CACHE_FOR_7_DAYS, function () {
             return DB::table('products')->where(['added_by' => 'seller'])->get();
         });
         return match ($type) {
@@ -164,7 +164,7 @@ if (!function_exists('getVendorProductsCount')) {
 if (!function_exists('getAdminProductsCount')) {
     function getAdminProductsCount(string $type): int
     {
-        $products = Cache::remember(CACHE_FOR_IN_HOUSE_ALL_PRODUCT_LIST, CACHE_FOR_7_DAYS, function () {
+        $products = Cache::remember(psfLanguageCacheKey(CACHE_FOR_IN_HOUSE_ALL_PRODUCT_LIST), CACHE_FOR_7_DAYS, function () {
             return DB::table('products')->where(['added_by' => 'admin'])->get();
         });
         return match ($type) {

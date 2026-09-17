@@ -63,6 +63,14 @@ class PsfGalleryItem extends Model
      */
     public function getAltAttribute(): string
     {
-        return $this->image_alt_text ?: $this->title;
+        return $this->text('image_alt_text') ?: $this->text('title');
+    }
+
+    /**
+     * A text field in the visitor's language (falls back to the default one).
+     */
+    public function text(string $field): string
+    {
+        return psfRecordText($this, $field);
     }
 }

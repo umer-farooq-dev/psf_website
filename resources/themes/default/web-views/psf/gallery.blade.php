@@ -21,7 +21,7 @@
                 @foreach ($categories as $option)
                     <a href="{{ route('psf.gallery.index', ['category' => $option]) }}"
                        class="btn btn-sm {{ $category === $option ? 'btn--primary' : 'btn-outline-primary' }}">
-                        {{ $option }}
+                        {{ psfGalleryCategoryLabel($option) }}
                     </a>
                 @endforeach
             </div>
@@ -37,29 +37,29 @@
                         <div class="card h-100">
                             @if ($item->image_url)
                                 <a href="{{ $item->image_url }}" class="gallery-item d-block"
-                                   data-sub-html="{{ $item->title }}{{ $item->location ? ' — ' . $item->location : '' }}">
+                                   data-sub-html="{{ $item->text('title') }}{{ $item->text('location') ? ' — ' . $item->text('location') : '' }}">
                                     <img src="{{ $item->image_url }}" alt="{{ $item->alt }}"
                                          class="card-img-top" loading="lazy"
                                          style="aspect-ratio: 4 / 3; object-fit: cover;">
                                 </a>
                             @endif
                             <div class="card-body">
-                                <h5 class="mb-2">{{ $item->title }}</h5>
+                                <h5 class="mb-2">{{ $item->text('title') }}</h5>
 
-                                @if ($item->category || $item->location)
+                                @if ($item->category || $item->text('location'))
                                     <div class="d-flex flex-wrap gap-2 mb-2">
                                         @if ($item->category)
-                                            <span class="badge badge-soft-primary">{{ $item->category }}</span>
+                                            <span class="badge badge-soft-primary">{{ psfGalleryCategoryLabel($item->category) }}</span>
                                         @endif
-                                        @if ($item->location)
-                                            <span class="badge badge-soft-secondary">{{ $item->location }}</span>
+                                        @if ($item->text('location'))
+                                            <span class="badge badge-soft-secondary">{{ $item->text('location') }}</span>
                                         @endif
                                     </div>
                                 @endif
 
-                                @if ($item->description)
+                                @if ($item->text('description'))
                                     <p class="text-muted mb-2 fs-12">
-                                        {{ \Illuminate\Support\Str::limit($item->description, 160) }}
+                                        {{ \Illuminate\Support\Str::limit($item->text('description'), 160) }}
                                     </p>
                                 @endif
 

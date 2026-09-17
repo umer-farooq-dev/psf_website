@@ -65,7 +65,8 @@ class BannerController extends BaseController
     {
         $bannerUrl = $this->getBannerUrl(request: $request);
         $data = $this->bannerService->getProcessedData(request: $request, bannerUrl: $bannerUrl);
-        $this->bannerRepo->add(data: $data);
+        $banner = $this->bannerRepo->add(data: $data);
+        $this->bannerService->psfSaveTexts(banner: $banner, request: $request);
         ToastMagic::success(translate('banner_added_successfully'));
         return redirect()->route('admin.banner.list');
     }
@@ -110,6 +111,7 @@ class BannerController extends BaseController
         $banner = $this->bannerRepo->getFirstWhere(params: ['id' => $id]);
         $data = $this->bannerService->getProcessedData(request: $request, bannerUrl: $bannerUrl, image: $banner['photo']);
         $this->bannerRepo->update(id: $banner['id'], data: $data);
+        $this->bannerService->psfSaveTexts(banner: $banner, request: $request);
         ToastMagic::success(translate('banner_updated_successfully'));
         return redirect()->route('admin.banner.list');
     }

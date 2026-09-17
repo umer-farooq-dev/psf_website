@@ -365,7 +365,7 @@ class HomeController extends Controller
         $clearanceSaleProducts = $this->cacheHomePageClearanceSaleProducts();
         $recommendedProduct = $this->cacheHomePageRandomSingleProductItem();
 
-        $featuredProductsList = Cache::remember(CACHE_FOR_FEATURED_PRODUCTS_LIST, CACHE_FOR_3_HOURS, function () {
+        $featuredProductsList = Cache::remember(psfLanguageCacheKey(CACHE_FOR_FEATURED_PRODUCTS_LIST), CACHE_FOR_3_HOURS, function () {
             $featuredProductsList = $this->product->with(['clearanceSale' => function ($query) {
                 $query->active();
             }])
@@ -375,7 +375,7 @@ class HomeController extends Controller
             return ProductManager::getPriorityWiseFeaturedProductsQuery(query: $featuredProductsList, dataLimit: 15);
         });
 
-        $mostSearchingProducts = Cache::remember(CACHE_FOR_MOST_SEARCHING_PRODUCTS_LIST, CACHE_FOR_3_HOURS, function () {
+        $mostSearchingProducts = Cache::remember(psfLanguageCacheKey(CACHE_FOR_MOST_SEARCHING_PRODUCTS_LIST), CACHE_FOR_3_HOURS, function () {
             return Product::active()->with(['category', 'clearanceSale' => function ($query) {
                 return $query->active();
             }])

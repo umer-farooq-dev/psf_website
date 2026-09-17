@@ -235,7 +235,7 @@
                                     {{ translate('category_Logo') }}
                                     <span class="text-danger">*</span>
                                 </label>
-                                <p class="fs-12 mb-0"> {{ translate('Upload_image') }}</p>
+                                <p class="fs-12 mb-0"> {{ translate('Upload_image') }}@if (psfDesign() === 'pixio') · {{ translate('recommended_size') }} 720 × 450 px @endif</p>
                             </div>
                             <div class="upload-file">
                                 <input type="file" name="image" id="category-image"

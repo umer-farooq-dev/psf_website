@@ -21,13 +21,41 @@ class BannerService
             'resource_type' => $request['resource_type'],
             'resource_id' => $request[$request->resource_type . '_id'],
             'theme' => theme_root_path(),
-            'title' => $request['title'],
-            'sub_title' => $request['sub_title'],
-            'button_text' => $request['button_text'],
+            // PSF: with the new design these arrive per language; the column
+            // keeps the default language, the others go to `translations`
+            'title' => $this->psfDefaultText($request['title']),
+            'sub_title' => $this->psfDefaultText($request['sub_title']),
+            'button_text' => $this->psfDefaultText($request['button_text']),
             'background_color' => $request['background_color'],
             'url' => $bannerUrl,
             'photo' => $imageName,
         ];
+    }
+
+    private function psfDefaultText(mixed $value): ?string
+    {
+        if (!is_array($value)) {
+            return $value;
+        }
+        $texts = psfTextFromInput($value);
+
+        return $texts[psfDefaultLanguageCode()] !== '' ? $texts[psfDefaultLanguageCode()] : (psfText($texts) ?: null);
+    }
+
+    /**
+     * PSF: saves the per-language texts of a banner, when the form sent them.
+     */
+    public function psfSaveTexts(object $banner, object $request): void
+    {
+        $fields = [];
+        foreach (['title', 'sub_title', 'button_text'] as $field) {
+            if (is_array($request[$field])) {
+                $fields[$field] = psfTextFromInput($request[$field]);
+            }
+        }
+        if ($fields) {
+            psfSaveTranslations($banner, $fields);
+        }
     }
 
     public function getBannerTypes(): array
